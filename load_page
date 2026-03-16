@@ -1,0 +1,9 @@
+from langchain_community.document_loaders import PlaywrightURLLoader
+
+loader = PlaywrightURLLoader(
+    urls=["https://careers.wipro.com/job/Cloud-Engineer/134226-en_US"],
+    remove_selectors=["header", "footer"]
+)
+
+docs = loader.load()
+print(docs[0].page_content[:1000])
