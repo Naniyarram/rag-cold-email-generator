@@ -1,4 +1,4 @@
-# ================= WINDOWS EVENT LOOP FIX =================
+#  WINDOWS EVENT LOOP FIX 
 import sys
 import asyncio
 from deepeval_evaluation import evaluate_email
@@ -6,7 +6,7 @@ from deepeval_evaluation import evaluate_email
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-# ================= IMPORTS =================
+
 import streamlit as st
 
 from rag_utils import (
@@ -17,7 +17,7 @@ from rag_utils import (
     generate_cold_email,
 )
 
-# ================= PAGE CONFIG =================
+#  PAGE CONFIG 
 st.set_page_config(
     page_title="AI Cold Email Generator (RAG)",
     page_icon="✉️",
@@ -30,7 +30,7 @@ st.caption(
     "Retrieval-Augmented Generation (RAG) + Groq LLM."
 )
 
-# ================= INPUTS =================
+#  INPUTS
 job_url = st.text_input("🔗 Enter Job URL")
 
 user_intent = st.text_input(
@@ -45,17 +45,17 @@ manual_text = st.text_area(
 
 generate_btn = st.button("🚀 Generate Cold Email")
 
-# ================= MAIN FLOW =================
+# MAIN FLOW 
 if generate_btn:
 
-    # ---------- Step 1: Get text ----------
+    #  Step 1: Get text 
     text = ""
 
     if job_url:
         with st.spinner("🔎 Attempting to load job page..."):
             text = load_or_scrape_job(job_url)
 
-    # ---------- Step 2: Fallback to manual paste ----------
+    #  Step 2: Fallback to manual paste
     if not text or len(text.strip()) == 0:
         if manual_text and len(manual_text.strip()) > 0:
             st.warning("⚠️ Scraping failed. Using manually pasted job description.")
@@ -69,7 +69,7 @@ if generate_btn:
 
     st.write("**Text length:**", len(text))
 
-    # ---------- Step 3: Chunking ----------
+    #  Step 3: Chunking 
     with st.spinner("✂️ Splitting text into chunks..."):
         chunks = chunk_text(text)
 
@@ -77,11 +77,11 @@ if generate_btn:
         st.error("Chunking failed. No usable content found.")
         st.stop()
 
-    # ---------- Step 4: Vector DB ----------
+    # Step 4: Vector DB 
     with st.spinner("🧠 Creating embeddings & vector database..."):
         collection = create_vector_store(chunks)
 
-    # ---------- Step 5: Retrieval ----------
+    #  Step 5: Retrieval 
     with st.spinner("📚 Retrieving relevant context..."):
         relevant_chunks = retrieve_relevant_chunks(collection, user_intent)
 
@@ -89,7 +89,7 @@ if generate_btn:
         st.error("Could not retrieve relevant context.")
         st.stop()
 
-    # ---------- Step 6: Generation ----------
+    # Step 6: Generation 
     with st.spinner("✍️ Generating cold email using Groq..."):
         email = generate_cold_email(relevant_chunks, user_intent)
 
@@ -101,7 +101,7 @@ if generate_btn:
         email=email
     )
 
-    # ================= OUTPUT =================
+    #  OUTPUT 
     st.success("✅ Cold email generated!")
 
     st.subheader("📧 Generated Cold Email")
