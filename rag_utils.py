@@ -1,4 +1,4 @@
-# ---------- STEP 1: LOAD & CLEAN WEBPAGE ----------
+# STEP 1: LOAD & CLEAN WEBPAGE
 import requests
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
@@ -7,7 +7,7 @@ from playwright.sync_api import sync_playwright
 def load_job_page(url: str) -> str:
     """Robust loader with JS wait + graceful failure."""
 
-    # ---------- TRY SIMPLE REQUEST ----------
+    # TRY SIMPLE REQUEST 
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
         r = requests.get(url, headers=headers, timeout=15)
@@ -19,7 +19,7 @@ def load_job_page(url: str) -> str:
     except Exception:
         html = None
 
-    # ---------- PLAYWRIGHT FALLBACK ----------
+    # PLAYWRIGHT FALLBACK 
     if not html:
         try:
             with sync_playwright() as p:
@@ -37,7 +37,7 @@ def load_job_page(url: str) -> str:
         except Exception:
             return ""  # graceful failure
 
-    # ---------- CLEAN ----------
+    #  CLEAN 
     soup = BeautifulSoup(html, "html.parser")
 
     for tag in soup(["script", "style", "noscript"]):
@@ -48,7 +48,7 @@ def load_job_page(url: str) -> str:
 
 
 
-# ================= CACHE-AWARE LOADER =================
+# CACHE-AWARE LOADER
 import os
 import hashlib
 
@@ -65,15 +65,15 @@ def load_or_scrape_job(url: str) -> str:
     filename = hashlib.md5(url.encode()).hexdigest() + ".txt"
     path = os.path.join("cache", filename)
 
-    # ---------- LOAD FROM CACHE ----------
+    #  LOAD FROM CACHE 
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
 
-    # ---------- SCRAPE ----------
+    #SCRAPE 
     text = load_job_page(url)
 
-    # ---------- SAVE TO CACHE ----------
+    #  SAVE TO CACHE 
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
 
@@ -81,7 +81,7 @@ def load_or_scrape_job(url: str) -> str:
 
 
 
-# ---------- STEP 2: TEXT CHUNKING ----------
+#  STEP 2: TEXT CHUNKING 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
@@ -93,7 +93,7 @@ def chunk_text(text: str):
     return splitter.split_text(text)
 
 
-# ---------- STEP 3: CREATE VECTOR STORE ----------
+#STEP 3: CREATE VECTOR STORE
 
 from chromadb import Client
 from chromadb.utils import embedding_functions
@@ -126,7 +126,7 @@ def create_vector_store(chunks):
 
 
 
-    # ---------- STEP 4: RETRIEVAL ----------
+    # STEP 4: RETRIEVAL 
 def retrieve_relevant_chunks(collection, query: str, k: int = 3):
     """Retrieve top-k relevant chunks from Chroma."""
     results = collection.query(
@@ -136,7 +136,7 @@ def retrieve_relevant_chunks(collection, query: str, k: int = 3):
     return results["documents"][0]
 
 
-# ---------- STEP 5: GROQ EMAIL GENERATION ----------
+# STEP 5: GROQ EMAIL GENERATION 
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 load_dotenv(override=True)
